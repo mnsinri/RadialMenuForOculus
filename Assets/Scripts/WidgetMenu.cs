@@ -63,13 +63,11 @@ public class WidgetMenu
     public void SetMenu(string text)
     {
         for(int i = 0; i < eventNum; i++)
-        {
             if(events[i].text == text)
             {
                 SetMenu(i);
                 break;
             }
-        }
     }
 
     public void SetTextInfo(float z, int fontSize, Color color)
@@ -83,10 +81,7 @@ public class WidgetMenu
     public void Invoke()
     {
         events[nowEventIndex++].func.Invoke();
-        if(eventNum <= nowEventIndex)
-        {
-            nowEventIndex = 0;
-        }
+        if(eventNum <= nowEventIndex) nowEventIndex = 0;
         menuText.text = events[nowEventIndex].text;
     }
 }

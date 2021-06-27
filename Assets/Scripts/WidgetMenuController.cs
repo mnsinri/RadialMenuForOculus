@@ -88,7 +88,7 @@ public class WidgetMenuController : MonoBehaviour
 
     private void OnValidate()
     {
-        if(m_widgetMenus.Count > 0)
+        if(m_widgetMenus != null && m_widgetMenus.Count > 0)
             FixTextRotation();
     }
 
@@ -105,9 +105,7 @@ public class WidgetMenuController : MonoBehaviour
         if(m_widgetMenus.Count < 0) return;
 
         for (int i = 0; i < m_widgetMenus.Count; i++)
-        {
             m_widgetMenus[i].SetTextInfo(0, defualtFontSize, textColor);
-        }
     }
 
     private int CalcNowMode(Vector2 trackPadPos)
@@ -231,17 +229,17 @@ public class WidgetMenuController : MonoBehaviour
         m_selected = CalcNowMode(touchScreenPosition);
         Emphasis(touchScreenPosition.magnitude);
 
-        if(selectionThreshold <= touchScreenPosition.magnitude)
-        {
-            //appear
-            m_fillAmount = 1f / widgetMenuEvents.Length;
-        }
-        else
-        {
-            //disappear
-            m_fillAmount = 0;
-        }
-        // m_fillAmount = selectionThreshold <= touchScreenPosition.magnitude ? 1f / widgetMenuEvents.Length : 0;
+        // if(selectionThreshold <= touchScreenPosition.magnitude)
+        // {
+        //     //appear
+        //     m_fillAmount = 1f / widgetMenuEvents.Length;
+        // }
+        // else
+        // {
+        //     //disappear
+        //     m_fillAmount = 0;
+        // }
+        m_fillAmount = selectionThreshold <= touchScreenPosition.magnitude ? 1f / widgetMenuEvents.Length : 0;
         m_selectorImage.fillAmount = Mathf.Lerp(m_selectorImage.fillAmount, m_fillAmount, agility);
 
         m_to = Quaternion.AngleAxis(((m_selected + 1) * m_menuDegree + startAxis + m_transitionAxis), Vector3.forward);
