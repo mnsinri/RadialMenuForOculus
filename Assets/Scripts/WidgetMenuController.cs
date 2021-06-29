@@ -6,9 +6,10 @@ using UnityEngine.UI;
 using UnityEngine.Events;
 
 [Serializable]
-public class WidgetMenus
+public class WidgetButton
 {
     public string name;
+    public ButtonType type;
     public WidgetEvent[] contents;
 }
 
@@ -32,10 +33,12 @@ public class WidgetMenuController : MonoBehaviour
     [SerializeField] Color selectorColor;
     [SerializeField] Color highlightColor;
     [SerializeField] Color textColor;
-    [SerializeField] WidgetMenus[] widgetMenuEvents;
+    [SerializeField] WidgetButton[] widgetMenuEvents;
     [SerializeField] float radius = 3.5f;
     [SerializeField] float EmphasisRatio = 1.5f;
     [SerializeField, Range(0, 1)] float selectionThreshold = 0.25f;
+    [SerializeField, Range(0, 1)] float decelerateTiming = 0.4f;
+    [SerializeField, Range(0, 1)] float decelerateRate = 0.6f;
     [SerializeField] int defualtFontSize = 14;
 
     private List<WidgetMenu> m_widgetMenus;
@@ -145,6 +148,11 @@ public class WidgetMenuController : MonoBehaviour
         img.localScale = Vector3.one;
     }
 
+    private float GetAgility()
+    {
+        return m_selectorImage.fillAmount < (1f / widgetMenuEvents.Length) * decelerateTiming ? agility * decelerateRate : agility;
+    }
+
     private void CreateMenuUI()
     {
         if(m_menuImage == null)
@@ -156,17 +164,6 @@ public class WidgetMenuController : MonoBehaviour
             m_menuImage.color = menuColor;
         }
 
-        if(m_selectorImage == null)
-        {
-            GameObject selectorImage = Instantiate(menuImagePrefab, parentCanvas.transform);
-            selectorImage.name = "Selector";
-            SetDefualtProparty(selectorImage.transform);
-            m_selectorImage = selectorImage.GetComponent<Image>();
-            m_selectorImage.color = selectorColor;
-            m_selectorImage.fillAmount = m_fillAmount = 1f / widgetMenuEvents.Length;
-            m_menuDegree = m_selectorImage.fillAmount * 360f;
-        }
-
         if(m_subMenuImage == null)
         {
             GameObject subMenuImage = Instantiate(subMenuImagePrefab, parentCanvas.transform);
@@ -176,11 +173,26 @@ public class WidgetMenuController : MonoBehaviour
             m_subMenuImage.color = menuColor;
         }
 
+        if(m_selectorImage == null)
+        {
+            GameObject selectorImage = Instantiate(menuImagePrefab, parentCanvas.transform);
+            selectorImage.name = "Selector";
+            selectorImage.transform.localPosition = new Vector3(0, 0, -1f);
+            selectorImage.transform.localRotation = Quaternion.identity;
+            selectorImage.transform.localScale = 0.93f * Vector3.one;
+            m_selectorImage = selectorImage.GetComponent<Image>();
+            m_selectorImage.color = selectorColor;
+            m_selectorImage.fillAmount = m_fillAmount = 1f / widgetMenuEvents.Length;
+            m_menuDegree = m_selectorImage.fillAmount * 360f;
+        }
+
         if(m_subSelectorImage == null)
         {
             GameObject subSelectorImage = Instantiate(subMenuImagePrefab, parentCanvas.transform);
             subSelectorImage.name = "SubSelector";
-            SetDefualtProparty(subSelectorImage.transform);
+            subSelectorImage.transform.localPosition = new Vector3(0, 0, -1f);
+            subSelectorImage.transform.localRotation = Quaternion.identity;
+            subSelectorImage.transform.localScale = 0.93f * Vector3.one;
             m_subSelectorImage = subSelectorImage.GetComponent<Image>();
             m_subSelectorImage.color = selectorColor;
 
@@ -195,7 +207,7 @@ public class WidgetMenuController : MonoBehaviour
             SetDefualtProparty(m_widgetMenusParent.transform);
         }
 
-        foreach(WidgetMenus menu in widgetMenuEvents)
+        foreach(WidgetButton menu in widgetMenuEvents)
         {
             AddMenu(menu.contents);
         }
@@ -223,6 +235,11 @@ public class WidgetMenuController : MonoBehaviour
 
     private void Update()
     {
+        if(Input.GetMouseButton(0))
+            m_widgetMenus[m_selected].Invoke();
+        else if(Input.GetMouseButtonUp(0))
+            m_widgetMenus[m_selected].Reset();
+
         // m_isShown = true;
         Vector2 touchScreenPosition = new Vector2((Input.mousePosition.x - Screen.width / 2f) / (Screen.width / 2f), (Input.mousePosition.y - Screen.height / 2f) / (Screen.height / 2f));
 
@@ -240,9 +257,9 @@ public class WidgetMenuController : MonoBehaviour
         //     m_fillAmount = 0;
         // }
         m_fillAmount = selectionThreshold <= touchScreenPosition.magnitude ? 1f / widgetMenuEvents.Length : 0;
-        m_selectorImage.fillAmount = Mathf.Lerp(m_selectorImage.fillAmount, m_fillAmount, agility);
+        m_selectorImage.fillAmount = Mathf.Lerp(m_selectorImage.fillAmount, m_fillAmount, GetAgility());
 
         m_to = Quaternion.AngleAxis(((m_selected + 1) * m_menuDegree + startAxis + m_transitionAxis), Vector3.forward);
-        m_selectorImage.gameObject.transform.localRotation = Quaternion.Lerp(m_selectorImage.gameObject.transform.localRotation, m_to, agility);
+        m_selectorImage.gameObject.transform.localRotation = Quaternion.Lerp(m_selectorImage.gameObject.transform.localRotation, m_to, GetAgility());
   }
 }
