@@ -235,13 +235,13 @@ public class WidgetMenuController : MonoBehaviour
 
     private void Update()
     {
-        if(Input.GetMouseButton(0))
+        // m_isShown = true;
+        Vector2 touchScreenPosition = new Vector2((Input.mousePosition.x - Screen.width / 2f) / (Screen.width / 2f), (Input.mousePosition.y - Screen.height / 2f) / (Screen.height / 2f));
+
+        if(Input.GetMouseButton(0) && selectionThreshold <= touchScreenPosition.magnitude)
             m_widgetMenus[m_selected].Invoke();
         else if(Input.GetMouseButtonUp(0))
             m_widgetMenus[m_selected].Reset();
-
-        // m_isShown = true;
-        Vector2 touchScreenPosition = new Vector2((Input.mousePosition.x - Screen.width / 2f) / (Screen.width / 2f), (Input.mousePosition.y - Screen.height / 2f) / (Screen.height / 2f));
 
         m_selected = CalcNowMode(touchScreenPosition);
         Emphasis(touchScreenPosition.magnitude);

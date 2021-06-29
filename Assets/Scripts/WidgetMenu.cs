@@ -91,10 +91,11 @@ public class WidgetMenu
         if(isCooltime) return;
 
         events[nowEventIndex++].callback.Invoke();
-        isCooltime = true;
-        timer.Start();
         if(eventNum <= nowEventIndex) nowEventIndex = 0;
         menuText.text = events[nowEventIndex].text;
+
+        isCooltime = true;
+        timer.Start();
     }
 
     public void Reset()
